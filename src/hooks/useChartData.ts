@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ChartDataSource, ChartQueryParams, ChartData } from '../types';
 
 export interface UseChartDataOptions {
@@ -15,6 +15,10 @@ export function useChartData(
   const [data, setData] = useState<ChartData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  
+  // 使用 ref 来存储 options，避免依赖数组问题
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
 
   const fetchData = useCallback(async () => {
     if (!dataSource || !params) return;
@@ -28,22 +32,22 @@ export function useChartData(
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Unknown error');
       setError(error);
-      options.onError?.(error);
+      optionsRef.current.onError?.(error);
     } finally {
       setLoading(false);
     }
-  }, [dataSource, params, options]);
+  }, [dataSource, params]); // 移除 options 依赖
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
   useEffect(() => {
-    if (options.autoRefresh && options.refreshInterval) {
-      const interval = setInterval(fetchData, options.refreshInterval);
+    if (optionsRef.current.autoRefresh && optionsRef.current.refreshInterval) {
+      const interval = setInterval(fetchData, optionsRef.current.refreshInterval);
       return () => clearInterval(interval);
     }
-  }, [fetchData, options.autoRefresh, options.refreshInterval]);
+  }, [fetchData, options.autoRefresh, options.refreshInterval]); // 保留这些基本类型的依赖
 
   const refetch = useCallback(() => {
     fetchData();
