@@ -1,0 +1,49 @@
+# 源代码
+src/
+__tests__/
+examples/
+docs/
+scripts/
+
+# 配置文件
+.github/
+.vscode/
+.idea/
+*.config.js
+*.config.ts
+jest.config.js
+rollup.config.js
+tsconfig.json
+.eslintrc*
+.prettierrc*
+
+# 开发文件
+*.test.*
+*.spec.*
+*.stories.*
+setupTests.ts
+
+# 依赖和缓存
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+
+# 环境文件
+.env*
+
+# 临时文件
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# 版本控制
+.git/
+.gitignore
+
+# 其他
+coverage/
+*.tgz
