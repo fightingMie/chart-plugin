@@ -1,12 +1,11 @@
 import { jsx, jsxs } from 'react/jsx-runtime';
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
-import { Table, Input, Space, Button, DatePicker, Select, Card, Row, Col, Alert, Spin } from 'antd';
+import { Input, Space, Button, Table, Select, Card, Row, Col } from 'antd';
 import { SearchOutlined, ReloadOutlined, DownloadOutlined } from '@ant-design/icons';
-import moment from 'moment';
 import * as echarts from 'echarts';
 import styled from 'styled-components';
 
-/*! *****************************************************************************
+/******************************************************************************
 Copyright (c) Microsoft Corporation.
 
 Permission to use, copy, modify, and/or distribute this software for any
@@ -20,7 +19,7 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
-/* global Reflect, Promise */
+/* global Reflect, Promise, SuppressedError, Symbol, Iterator */
 
 var extendStatics = function(d, b) {
     extendStatics = Object.setPrototypeOf ||
@@ -59,12 +58,12 @@ function __awaiter(thisArg, _arguments, P, generator) {
 }
 
 function __generator(thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -93,114 +92,36 @@ function __spreadArray(to, from, pack) {
             ar[i] = from[i];
         }
     }
-    return to.concat(ar || from);
+    return to.concat(ar || Array.prototype.slice.call(from));
 }
 
 function __makeTemplateObject(cooked, raw) {
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 }
+typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+    var e = new Error(message);
+    return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+};
 
 var Chart = function (_a) {
-    var data = _a.data, _b = _a.height, height = _b === void 0 ? 400 : _b, _c = _a.loading, loading = _c === void 0 ? false : _c, title = _a.title, _d = _a.showLegend, showLegend = _d === void 0 ? true : _d, _e = _a.showTooltip, showTooltip = _e === void 0 ? true : _e;
+    var options = _a.options, _b = _a.height, height = _b === void 0 ? 400 : _b, _c = _a.loading, loading = _c === void 0 ? false : _c, _d = _a.visibleSeries, visibleSeries = _d === void 0 ? [] : _d;
     var chartRef = useRef(null);
     var chartInstance = useRef(null);
     useEffect(function () {
         if (!chartRef.current)
             return;
-        // 初始化图表
         if (!chartInstance.current) {
             chartInstance.current = echarts.init(chartRef.current);
         }
         var chart = chartInstance.current;
-        // 配置图表选项
-        var option = {
-            title: title
-                ? {
-                    text: title,
-                    left: 'center',
-                    textStyle: {
-                        fontSize: 16,
-                        fontWeight: 'normal',
-                    },
-                }
-                : undefined,
-            tooltip: showTooltip
-                ? {
-                    trigger: 'axis',
-                    axisPointer: {
-                        type: 'cross',
-                    },
-                    formatter: function (params) {
-                        if (!Array.isArray(params))
-                            return '';
-                        var time = new Date(params[0].axisValue).toLocaleString();
-                        var content = "<div style=\"margin-bottom: 4px;\">".concat(time, "</div>");
-                        params.forEach(function (param) {
-                            var _a;
-                            content += "\n              <div style=\"display: flex; align-items: center; margin-bottom: 2px;\">\n                <span style=\"display: inline-block; width: 10px; height: 10px; background-color: ".concat(param.color, "; border-radius: 50%; margin-right: 8px;\"></span>\n                <span style=\"margin-right: 8px;\">").concat(param.seriesName, ":</span>\n                <span style=\"font-weight: bold;\">").concat(((_a = param.value[1]) === null || _a === void 0 ? void 0 : _a.toFixed(2)) || 'N/A', "</span>\n              </div>\n            ");
-                        });
-                        return content;
-                    },
-                }
-                : undefined,
-            legend: showLegend
-                ? {
-                    type: 'scroll',
-                    bottom: 10,
-                    data: (data === null || data === void 0 ? void 0 : data.series.map(function (s) { return s.name; })) || [],
-                }
-                : undefined,
-            grid: {
-                left: '3%',
-                right: '4%',
-                bottom: showLegend ? '15%' : '3%',
-                containLabel: true,
-            },
-            xAxis: {
-                type: 'time',
-                boundaryGap: false,
-                axisLine: {
-                    lineStyle: {
-                        color: '#d9d9d9',
-                    },
-                },
-                axisLabel: {
-                    formatter: function (value) {
-                        return new Date(value).toLocaleTimeString();
-                    },
-                },
-            },
-            yAxis: {
-                type: 'value',
-                axisLine: {
-                    lineStyle: {
-                        color: '#d9d9d9',
-                    },
-                },
-                splitLine: {
-                    lineStyle: {
-                        color: '#f0f0f0',
-                    },
-                },
-            },
-            series: (data === null || data === void 0 ? void 0 : data.series.map(function (series) { return ({
-                name: series.name,
-                type: 'line',
-                data: series.data,
-                smooth: true,
-                lineStyle: {
-                    color: series.color,
-                    width: 2,
-                },
-                itemStyle: {
-                    color: series.color,
-                },
-                emphasis: {
-                    focus: 'series',
-                },
-            }); })) || [],
-        };
+        // 处理系列过滤
+        var processedOptions = __assign({}, options);
+        if (visibleSeries.length > 0 && (options === null || options === void 0 ? void 0 : options.series)) {
+            processedOptions.series = options.series.filter(function (series) {
+                return visibleSeries.includes(series.name);
+            });
+        }
         // 设置加载状态
         if (loading) {
             chart.showLoading('default', {
@@ -213,7 +134,9 @@ var Chart = function (_a) {
         }
         else {
             chart.hideLoading();
-            chart.setOption(option, true);
+            if (processedOptions) {
+                chart.setOption(processedOptions, true);
+            }
         }
         // 响应式调整
         var handleResize = function () {
@@ -223,7 +146,7 @@ var Chart = function (_a) {
         return function () {
             window.removeEventListener('resize', handleResize);
         };
-    }, [data, loading, title, showLegend, showTooltip]);
+    }, [options, loading, visibleSeries]);
     useEffect(function () {
         return function () {
             if (chartInstance.current) {
@@ -235,11 +158,13 @@ var Chart = function (_a) {
     return (jsx("div", { ref: chartRef, style: { width: '100%', height: "".concat(height, "px") } }));
 };
 
-var StyledTable = styled(Table)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  .ant-table-cell {\n    padding: 8px 12px !important;\n\n    .cell-content {\n      max-width: 200px;\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n  }\n\n  .highlight {\n    background-color: #fff2e8;\n    padding: 0 2px;\n  }\n"], ["\n  .ant-table-cell {\n    padding: 8px 12px !important;\n\n    .cell-content {\n      max-width: 200px;\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n  }\n\n  .highlight {\n    background-color: #fff2e8;\n    padding: 0 2px;\n  }\n"])));
+var TableContainer = styled.div(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  .ant-table-cell {\n    padding: 8px 12px !important;\n\n    .cell-content {\n      max-width: 200px;\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n  }\n\n  .highlight {\n    background-color: #fff2e8;\n    padding: 0 2px;\n  }\n\n  .color-indicator {\n    display: inline-block;\n    width: 12px;\n    height: 12px;\n    border-radius: 2px;\n    margin-right: 8px;\n    vertical-align: middle;\n  }\n"], ["\n  .ant-table-cell {\n    padding: 8px 12px !important;\n\n    .cell-content {\n      max-width: 200px;\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n  }\n\n  .highlight {\n    background-color: #fff2e8;\n    padding: 0 2px;\n  }\n\n  .color-indicator {\n    display: inline-block;\n    width: 12px;\n    height: 12px;\n    border-radius: 2px;\n    margin-right: 8px;\n    vertical-align: middle;\n  }\n"])));
 var LineTable = function (_a) {
-    var data = _a.data, _b = _a.colorMap, colorMap = _b === void 0 ? {} : _b, _c = _a.checkedItems, checkedItems = _c === void 0 ? [] : _c; _a.onItemCheck; var _d = _a.height, height = _d === void 0 ? 400 : _d;
-    var _e = useState(''), searchText = _e[0], setSearchText = _e[1];
-    var _f = useState(''), searchColumn = _f[0], setSearchColumn = _f[1];
+    var data = _a.data, _b = _a.colorMap, colorMap = _b === void 0 ? {} : _b, _c = _a.checkedItems, checkedItems = _c === void 0 ? [] : _c, onItemCheck = _a.onItemCheck, _d = _a.height, height = _d === void 0 ? 400 : _d, _e = _a.usePagination, usePagination = _e === void 0 ? true : _e, // 默认使用分页
+    _f = _a.maxHeight, // 默认使用分页
+    maxHeight = _f === void 0 ? 600 : _f;
+    var _g = useState(''), searchText = _g[0], setSearchText = _g[1];
+    var _h = useState(''), searchColumn = _h[0], setSearchColumn = _h[1];
     var columns = useMemo(function () {
         if (!data || data.length === 0)
             return [];
@@ -248,56 +173,184 @@ var LineTable = function (_a) {
             Object.keys(item).forEach(function (key) { return allKeys.add(key); });
         });
         return Array.from(allKeys)
-            .filter(function (key) { return key !== 'key'; })
-            .map(function (key) { return ({
-            title: key,
-            dataIndex: key,
-            key: key,
-            width: key === 'time' ? 180 : 150,
-            render: function (text, record) {
-                var displayText = String(text || '');
-                var highlighted = searchText && searchColumn === key
-                    ? displayText.replace(new RegExp("(".concat(searchText, ")"), 'gi'), '<span class="highlight">$1</span>')
-                    : displayText;
-                return (jsx("div", { className: "cell-content", style: {
-                        color: colorMap[key] || '#000',
-                        fontWeight: checkedItems.includes(key) ? 'bold' : 'normal',
-                    }, dangerouslySetInnerHTML: { __html: highlighted }, title: displayText }));
-            },
-            sorter: function (a, b) {
-                var aVal = String(a[key] || '');
-                var bVal = String(b[key] || '');
-                return aVal.localeCompare(bVal);
-            },
-        }); });
-    }, [data, searchText, searchColumn, colorMap, checkedItems]);
+            .filter(function (key) { return key !== 'key' && key !== 'time'; }) // 过滤掉time列
+            .map(function (key) {
+            var isNameColumn = key === 'name';
+            var isNumericColumn = ['current', 'average', 'maximum', 'minimum'].includes(key);
+            var isSearchableColumn = isNameColumn; // 只有name列支持搜索
+            return {
+                title: key === 'name' ? '系列名称' :
+                    key === 'current' ? '当前值' :
+                        key === 'average' ? '平均值' :
+                            key === 'maximum' ? '最大值' :
+                                key === 'minimum' ? '最小值' : key,
+                dataIndex: key,
+                key: key,
+                width: isNameColumn ? 200 : 120,
+                // 只有非系列名称列支持排序
+                sorter: !isNameColumn ? (isNumericColumn ? {
+                    compare: function (a, b) {
+                        var aVal = parseFloat(a[key]) || 0;
+                        var bVal = parseFloat(b[key]) || 0;
+                        return aVal - bVal;
+                    },
+                    multiple: 1,
+                } : {
+                    compare: function (a, b) {
+                        var _a, _b;
+                        var aStr = ((_a = a[key]) === null || _a === void 0 ? void 0 : _a.toString()) || '';
+                        var bStr = ((_b = b[key]) === null || _b === void 0 ? void 0 : _b.toString()) || '';
+                        return aStr.localeCompare(bStr);
+                    },
+                    multiple: 2,
+                }) : undefined,
+                render: function (text, record) {
+                    var displayText = (text === null || text === void 0 ? void 0 : text.toString()) || '';
+                    var hasValidSearch = searchColumn === key && Boolean(searchText === null || searchText === void 0 ? void 0 : searchText.trim());
+                    var isHighlighted = hasValidSearch && displayText.toLowerCase().includes(searchText.toLowerCase());
+                    if (isNameColumn) {
+                        var color = colorMap[record.name] || '#1890ff';
+                        return (jsxs("div", __assign({ className: "cell-content", style: { display: 'flex', alignItems: 'center' } }, { children: [jsx("span", { className: "color-indicator", style: { backgroundColor: color } }), isHighlighted ? (jsx("span", { dangerouslySetInnerHTML: {
+                                        __html: displayText.replace(new RegExp(searchText, 'gi'), function (match) { return "<span class=\"highlight\">".concat(match, "</span>"); }),
+                                    } })) : (displayText)] })));
+                    }
+                    return (jsx("div", __assign({ className: "cell-content" }, { children: isHighlighted ? (jsx("span", { dangerouslySetInnerHTML: {
+                                __html: displayText.replace(new RegExp(searchText, 'gi'), function (match) { return "<span class=\"highlight\">".concat(match, "</span>"); }),
+                            } })) : (displayText) })));
+                },
+                // 只有系列名称列支持搜索
+                filterDropdown: isSearchableColumn ? function (_a) {
+                    var setSelectedKeys = _a.setSelectedKeys, selectedKeys = _a.selectedKeys, confirm = _a.confirm, clearFilters = _a.clearFilters;
+                    return (jsxs("div", __assign({ style: { padding: 8 } }, { children: [jsx(Input, { placeholder: "\u641C\u7D22 ".concat(key === 'name' ? '系列名称' : key), value: selectedKeys[0], onChange: function (e) { return setSelectedKeys(e.target.value ? [e.target.value] : []); }, onPressEnter: function () {
+                                    confirm();
+                                    setSearchText(selectedKeys[0]);
+                                    setSearchColumn(key);
+                                }, style: { marginBottom: 8, display: 'block' } }), jsxs(Space, { children: [jsx(Button, __assign({ type: "primary", onClick: function () {
+                                            confirm();
+                                            setSearchText(selectedKeys[0]);
+                                            setSearchColumn(key);
+                                        }, icon: jsx(SearchOutlined, {}), size: "small", style: { width: 90 } }, { children: "\u641C\u7D22" })), jsx(Button, __assign({ onClick: function () {
+                                            clearFilters && clearFilters();
+                                            setSearchText('');
+                                            setSearchColumn('');
+                                        }, size: "small", style: { width: 90 } }, { children: "\u91CD\u7F6E" }))] })] })));
+                } : undefined,
+                filterIcon: isSearchableColumn ? function (filtered) { return (jsx(SearchOutlined, { style: { color: filtered ? '#1890ff' : undefined } })); } : undefined,
+            };
+        });
+    }, [data, colorMap, searchText, searchColumn]);
     var filteredData = useMemo(function () {
         if (!searchText || !searchColumn)
             return data;
         return data.filter(function (item) {
-            var value = String(item[searchColumn] || '').toLowerCase();
-            return value.includes(searchText.toLowerCase());
+            var value = item[searchColumn];
+            return value === null || value === void 0 ? void 0 : value.toString().toLowerCase().includes(searchText.toLowerCase());
         });
     }, [data, searchText, searchColumn]);
-    return (jsxs("div", { children: [jsxs("div", __assign({ style: {
-                    marginBottom: 16,
-                    display: 'flex',
-                    gap: 8,
-                    alignItems: 'center',
-                } }, { children: [jsx(Input.Search, { placeholder: searchColumn ? "\u5728 ".concat(searchColumn, " \u5217\u4E2D\u641C\u7D22...") : '请先选择搜索列', value: searchText, onChange: function (e) { return setSearchText(e.target.value); }, onSearch: function (value) { return setSearchText(value); }, disabled: !searchColumn, style: { width: 300 }, prefix: jsx(SearchOutlined, {}) }), jsxs(Space, { children: [columns.map(function (col) { return (jsx(Button, __assign({ size: "small", type: searchColumn === col.key ? 'primary' : 'default', onClick: function () {
-                                    setSearchColumn(col.key);
-                                    setSearchText('');
-                                } }, { children: col.title }), col.key)); }), searchColumn && (jsx(Button, __assign({ size: "small", onClick: function () {
-                                    setSearchText('');
-                                    setSearchColumn('');
-                                } }, { children: "\u6E05\u9664" })))] })] })), jsx(StyledTable, { columns: columns, dataSource: filteredData, pagination: {
-                    pageSize: 50,
-                    showSizeChanger: true,
-                    showQuickJumper: true,
-                    showTotal: function (total) { return "\u5171 ".concat(total, " \u6761\u8BB0\u5F55"); },
-                }, scroll: { y: height - 100, x: 'max-content' }, size: "small", bordered: true })] }));
+    // 计算表格滚动配置
+    var scrollConfig = useMemo(function () {
+        if (usePagination) {
+            // 使用分页时的滚动配置
+            return { y: height - 100, x: 'max-content' };
+        }
+        else {
+            // 不使用分页时，设置最大高度并允许滚动
+            return { y: maxHeight - 150, x: 'max-content' };
+        }
+    }, [usePagination, height, maxHeight]);
+    return (jsxs("div", { children: [jsx("div", __assign({ style: { marginBottom: 16 } }, { children: jsxs(Space, { children: [jsx(Input, { placeholder: "\u5168\u5C40\u641C\u7D22...", value: searchText, onChange: function (e) { return setSearchText(e.target.value); }, style: { width: 200 }, prefix: jsx(SearchOutlined, {}) }), searchText && (jsx(Button, __assign({ onClick: function () {
+                                setSearchText('');
+                                setSearchColumn('');
+                            } }, { children: "\u6E05\u9664\u641C\u7D22" })))] }) })), jsx(TableContainer, { children: jsx(Table, { columns: columns, dataSource: filteredData, pagination: usePagination ? {
+                        pageSize: 50,
+                        showSizeChanger: true,
+                        showQuickJumper: true,
+                        showTotal: function (total) { return "\u5171 ".concat(total, " \u6761\u8BB0\u5F55"); },
+                    } : false, scroll: scrollConfig, size: "small", bordered: true, rowSelection: {
+                        selectedRowKeys: checkedItems,
+                        onChange: function (selectedRowKeys, selectedRows) {
+                            onItemCheck && onItemCheck(selectedRows.map(function (item) { return item.name; }));
+                        },
+                        getCheckboxProps: function (record) { return ({
+                            name: record.name,
+                        }); },
+                    } }) })] }));
 };
 var templateObject_1;
+
+var Option = Select.Option;
+var MetricChartPlugin = function (_a) {
+    var chartOptions = _a.chartOptions, _b = _a.statsData, statsData = _b === void 0 ? [] : _b, _c = _a.title, title = _c === void 0 ? '指标图表' : _c, _d = _a.height, height = _d === void 0 ? 400 : _d, _e = _a.showControls, showControls = _e === void 0 ? true : _e, _f = _a.showTable, showTable = _f === void 0 ? true : _f, _g = _a.usePagination, usePagination = _g === void 0 ? true : _g, _h = _a.maxHeight, maxHeight = _h === void 0 ? 600 : _h, onExport = _a.onExport, onRefresh = _a.onRefresh;
+    var _j = useState('both'), viewMode = _j[0], setViewMode = _j[1];
+    var _k = useState([]), checkedItems = _k[0], setCheckedItems = _k[1];
+    var _l = useState(false), loading = _l[0], setLoading = _l[1];
+    // 将统计数据转换为表格数据
+    var tableData = useMemo(function () {
+        return statsData.map(function (stat) {
+            var _a, _b, _c, _d;
+            return ({
+                key: stat.name,
+                name: stat.name,
+                current: ((_a = stat.current) === null || _a === void 0 ? void 0 : _a.toFixed(2)) || '-',
+                maximum: ((_b = stat.maximum) === null || _b === void 0 ? void 0 : _b.toFixed(2)) || '-',
+                minimum: ((_c = stat.minimum) === null || _c === void 0 ? void 0 : _c.toFixed(2)) || '-',
+                average: ((_d = stat.average) === null || _d === void 0 ? void 0 : _d.toFixed(2)) || '-',
+            });
+        });
+    }, [statsData]);
+    // 生成颜色映射
+    var colorMap = useMemo(function () {
+        var map = {};
+        statsData.forEach(function (stat) {
+            if (stat.color) {
+                map[stat.name] = stat.color;
+            }
+        });
+        return map;
+    }, [statsData]);
+    var handleItemCheck = function (selectedRowKeys) {
+        setCheckedItems(selectedRowKeys);
+    };
+    var handleExport = function () {
+        if (!tableData.length)
+            return;
+        if (onExport) {
+            onExport(statsData);
+        }
+        else {
+            // 默认导出CSV
+            var csvContent = __spreadArray([
+                Object.keys(tableData[0]).join(',')
+            ], tableData.map(function (row) { return Object.values(row).join(','); }), true).join('\n');
+            var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = "metric-data-".concat(Date.now(), ".csv");
+            link.click();
+        }
+    };
+    var handleRefresh = function () { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (!onRefresh) return [3 /*break*/, 4];
+                    setLoading(true);
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, , 3, 4]);
+                    return [4 /*yield*/, onRefresh()];
+                case 2:
+                    _a.sent();
+                    return [3 /*break*/, 4];
+                case 3:
+                    setLoading(false);
+                    return [7 /*endfinally*/];
+                case 4: return [2 /*return*/];
+            }
+        });
+    }); };
+    return (jsxs(Card, __assign({ title: title, style: { width: '100%' } }, { children: [showControls && (jsx("div", __assign({ style: { marginBottom: 16 } }, { children: jsxs(Row, __assign({ gutter: [16, 16], align: "middle" }, { children: [jsx(Col, { children: jsxs(Space, { children: [jsx("span", { children: "\u89C6\u56FE:" }), jsxs(Select, __assign({ value: viewMode, onChange: setViewMode, style: { width: 120 } }, { children: [jsx(Option, __assign({ value: "chart" }, { children: "\u4EC5\u56FE\u8868" })), showTable && jsx(Option, __assign({ value: "table" }, { children: "\u4EC5\u8868\u683C" })), showTable && jsx(Option, __assign({ value: "both" }, { children: "\u56FE\u8868+\u8868\u683C" }))] }))] }) }), jsx(Col, { children: jsxs(Space, { children: [onRefresh && (jsx(Button, __assign({ icon: jsx(ReloadOutlined, {}), onClick: handleRefresh, loading: loading }, { children: "\u5237\u65B0" }))), showTable && (jsx(Button, __assign({ icon: jsx(DownloadOutlined, {}), onClick: handleExport, disabled: !tableData.length }, { children: "\u5BFC\u51FA" })))] }) })] })) }))), (viewMode === 'chart' || viewMode === 'both') && (jsx("div", __assign({ style: { marginBottom: viewMode === 'both' ? 24 : 0 } }, { children: jsx(Chart, { options: chartOptions, height: height, loading: loading, visibleSeries: checkedItems }) }))), showTable && (viewMode === 'table' || viewMode === 'both') && (jsx(LineTable, { data: tableData, colorMap: colorMap, height: viewMode === 'table' ? height : 300, onItemCheck: handleItemCheck, checkedItems: checkedItems, usePagination: usePagination, maxHeight: maxHeight }))] })));
+};
 
 function useChartData(dataSource, params, options) {
     var _this = this;
@@ -358,95 +411,6 @@ function useChartData(dataSource, params, options) {
         refetch: refetch,
     };
 }
-
-var RangePicker = DatePicker.RangePicker;
-var Option = Select.Option;
-var MetricChartPlugin = function (_a) {
-    var dataSource = _a.dataSource, defaultTimeRange = _a.defaultTimeRange, _b = _a.defaultStep, defaultStep = _b === void 0 ? 60 : _b, _c = _a.title, title = _c === void 0 ? '指标图表' : _c, _d = _a.height, height = _d === void 0 ? 400 : _d, _e = _a.showControls, showControls = _e === void 0 ? true : _e, onTimeRangeChange = _a.onTimeRangeChange, onStepChange = _a.onStepChange;
-    var _f = useState(defaultTimeRange || [Date.now() - 3600000, Date.now()]), timeRange = _f[0], setTimeRange = _f[1];
-    var _g = useState(defaultStep), step = _g[0], setStep = _g[1];
-    var _h = useState('both'), viewMode = _h[0], setViewMode = _h[1];
-    var queryParams = useMemo(function () { return ({
-        startTime: Math.floor(timeRange[0] / 1000),
-        endTime: Math.floor(timeRange[1] / 1000),
-        step: step,
-    }); }, [timeRange, step]);
-    var _j = useChartData(dataSource, queryParams, {
-        onError: function (err) {
-            console.error('Chart data fetch error:', err);
-        },
-    }), data = _j.data, loading = _j.loading, error = _j.error, refetch = _j.refetch;
-    var tableData = useMemo(function () {
-        if (!data || !data.series.length)
-            return [];
-        var result = [];
-        var maxLength = Math.max.apply(Math, data.series.map(function (s) { return s.data.length; }));
-        var _loop_1 = function (i) {
-            var row = {
-                key: "row-".concat(i),
-                time: data.timestamps[i]
-                    ? new Date(data.timestamps[i]).toLocaleString()
-                    : '',
-            };
-            data.series.forEach(function (series) {
-                if (series.data[i]) {
-                    row[series.name] = series.data[i][1];
-                }
-            });
-            result.push(row);
-        };
-        for (var i = 0; i < maxLength; i++) {
-            _loop_1(i);
-        }
-        return result;
-    }, [data]);
-    var colorMap = useMemo(function () {
-        var map = {};
-        data === null || data === void 0 ? void 0 : data.series.forEach(function (series) {
-            if (series.color) {
-                map[series.name] = series.color;
-            }
-        });
-        return map;
-    }, [data]);
-    // 兼容 Ant Design 4.x 的时间处理
-    var handleTimeRangeChange = function (dates) {
-        if (dates && dates.length === 2) {
-            var newRange = [
-                dates[0].valueOf(),
-                dates[1].valueOf(),
-            ];
-            setTimeRange(newRange);
-            onTimeRangeChange === null || onTimeRangeChange === void 0 ? void 0 : onTimeRangeChange(Math.floor(newRange[0] / 1000), Math.floor(newRange[1] / 1000));
-        }
-    };
-    var handleStepChange = function (newStep) {
-        setStep(newStep);
-        onStepChange === null || onStepChange === void 0 ? void 0 : onStepChange(newStep);
-    };
-    var handleExport = function () {
-        if (!tableData.length)
-            return;
-        var csvContent = __spreadArray([
-            Object.keys(tableData[0]).join(',')
-        ], tableData.map(function (row) { return Object.values(row).join(','); }), true).join('\n');
-        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        var link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = "metric-data-".concat(Date.now(), ".csv");
-        link.click();
-    };
-    var stepOptions = [
-        { label: '15秒', value: 15 },
-        { label: '30秒', value: 30 },
-        { label: '1分钟', value: 60 },
-        { label: '5分钟', value: 300 },
-        { label: '15分钟', value: 900 },
-        { label: '30分钟', value: 1800 },
-        { label: '1小时', value: 3600 },
-    ];
-    return (jsxs(Card, __assign({ title: title, style: { width: '100%' } }, { children: [showControls && (jsx("div", __assign({ style: { marginBottom: 16 } }, { children: jsxs(Row, __assign({ gutter: [16, 16], align: "middle" }, { children: [jsx(Col, { children: jsxs(Space, { children: [jsx("span", { children: "\u65F6\u95F4\u8303\u56F4:" }), jsx(RangePicker, { value: [moment(timeRange[0]), moment(timeRange[1])], onChange: handleTimeRangeChange, showTime: true, format: "YYYY-MM-DD HH:mm:ss" })] }) }), jsx(Col, { children: jsxs(Space, { children: [jsx("span", { children: "\u6B65\u957F:" }), jsx(Select, __assign({ value: step, onChange: handleStepChange, style: { width: 100 } }, { children: stepOptions.map(function (option) { return (jsx(Option, __assign({ value: option.value }, { children: option.label }), option.value)); }) }))] }) }), jsx(Col, { children: jsxs(Space, { children: [jsx("span", { children: "\u89C6\u56FE:" }), jsxs(Select, __assign({ value: viewMode, onChange: setViewMode, style: { width: 120 } }, { children: [jsx(Option, __assign({ value: "chart" }, { children: "\u4EC5\u56FE\u8868" })), jsx(Option, __assign({ value: "table" }, { children: "\u4EC5\u8868\u683C" })), jsx(Option, __assign({ value: "both" }, { children: "\u56FE\u8868+\u8868\u683C" }))] }))] }) }), jsx(Col, { children: jsxs(Space, { children: [jsx(Button, __assign({ icon: jsx(ReloadOutlined, {}), onClick: refetch, loading: loading }, { children: "\u5237\u65B0" })), jsx(Button, __assign({ icon: jsx(DownloadOutlined, {}), onClick: handleExport, disabled: !tableData.length }, { children: "\u5BFC\u51FA" }))] }) })] })) }))), error && (jsx(Alert, { message: "\u6570\u636E\u52A0\u8F7D\u5931\u8D25", description: error.message, type: "error", showIcon: true, style: { marginBottom: 16 } })), jsxs(Spin, __assign({ spinning: loading }, { children: [(viewMode === 'chart' || viewMode === 'both') && (jsx("div", __assign({ style: { marginBottom: viewMode === 'both' ? 24 : 0 } }, { children: jsx(Chart, { data: data, height: height, loading: loading, showLegend: true, showTooltip: true }) }))), (viewMode === 'table' || viewMode === 'both') && (jsx(LineTable, { data: tableData, colorMap: colorMap, height: viewMode === 'table' ? height : 300 }))] }))] })));
-};
 
 var BaseDataSource = /** @class */ (function () {
     function BaseDataSource() {

@@ -17,33 +17,47 @@ export interface ChartDataSource {
     fetchData(params: ChartQueryParams): Promise<ChartData>;
     validateParams?(params: ChartQueryParams): boolean;
 }
+export interface MetricStats {
+    name: string;
+    current?: number;
+    maximum?: number;
+    minimum?: number;
+    average?: number;
+    color?: string;
+}
 export interface MetricChartPluginProps {
-    dataSource: ChartDataSource;
-    defaultTimeRange?: [number, number];
-    defaultStep?: number;
+    chartOptions: any;
+    statsData?: MetricStats[];
     title?: string;
     height?: number;
     showControls?: boolean;
-    onTimeRangeChange?: (startTime: number, endTime: number) => void;
-    onStepChange?: (step: number) => void;
+    showTable?: boolean;
+    usePagination?: boolean;
+    maxHeight?: number;
+    onExport?: (data: MetricStats[]) => void;
+    onRefresh?: () => void;
 }
 export interface ChartProps {
-    data: ChartData;
+    options: any;
     height?: number;
     loading?: boolean;
-    title?: string;
-    showLegend?: boolean;
-    showTooltip?: boolean;
+    visibleSeries?: string[];
 }
 export interface DataType {
     key: string;
-    time: string;
+    name: string;
+    current?: string;
+    maximum?: string;
+    minimum?: string;
+    average?: string;
     [key: string]: any;
 }
 export interface LineTableProps {
     data: DataType[];
     colorMap?: Record<string, string>;
     checkedItems?: string[];
-    onItemCheck?: (item: string, checked: boolean) => void;
+    onItemCheck?: (values: string[]) => void;
     height?: number;
+    usePagination?: boolean;
+    maxHeight?: number;
 }
