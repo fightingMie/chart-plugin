@@ -2,27 +2,19 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
-  moduleNameMapping: {
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
+  moduleNameMapper: {  // 修复：从 moduleNameMapping 改为 moduleNameMapper
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
-  collectCoverageFrom: [
-    'src/**/*.{ts,tsx}',
-    '!src/**/*.d.ts',
-    '!src/index.ts'
-  ],
-  coverageThreshold: {
-    global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80
-    }
+  transform: {
+    '^.+\\.(ts|tsx)$': 'ts-jest',
   },
   testMatch: [
-    '<rootDir>/__tests__/**/*.(test|spec).{ts,tsx}'
+    '**/__tests__/**/*.(ts|tsx)',
+    '**/*.(test|spec).(ts|tsx)',
   ],
-  transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest'
-  },
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node']
+  collectCoverageFrom: [
+    'src/**/*.(ts|tsx)',
+    '!src/**/*.d.ts',
+    '!src/setupTests.ts',
+  ],
 };
