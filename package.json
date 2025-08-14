@@ -43,16 +43,16 @@
     "echarts",
     "antd"
   ],
-  "author": "Your Name <your.email@example.com>",
+  "author": "Liu Yang <ly592554390@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/react-metric-chart-plugin.git"
+    "url": "https://github.com/yang1119/react-metric-chart-plugin.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/react-metric-chart-plugin/issues"
+    "url": "https://github.com/yang1119/react-metric-chart-plugin/issues"
   },
-  "homepage": "https://github.com/yourusername/react-metric-chart-plugin#readme",
+  "homepage": "https://github.com/yang1119/react-metric-chart-plugin#readme",
   "peerDependencies": {
     "antd": ">=4.0.0",
     "react": ">=16.8.0",
