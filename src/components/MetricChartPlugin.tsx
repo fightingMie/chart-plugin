@@ -6,7 +6,7 @@ import {
   Button,
   Row,
   Col,
-  Alert,
+  // Alert, // 移除未使用的导入
 } from 'antd';
 import { ReloadOutlined, DownloadOutlined } from '@ant-design/icons';
 import { Chart } from './Chart';

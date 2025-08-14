@@ -1,4 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
+import { act } from 'react'; // 使用 React 19 的 act
 import { useChartData } from '../../src/hooks/useChartData';
 import { BaseDataSource } from '../../src/adapters/BaseDataSource';
 import { ChartQueryParams, ChartData } from '../../src/types';
@@ -11,7 +12,7 @@ class MockDataSource extends BaseDataSource {
     this.shouldFail = shouldFail;
   }
   
-  async fetchData(params: ChartQueryParams): Promise<ChartData> {
+  async fetchData(): Promise<ChartData> {
     if (this.shouldFail) {
       throw new Error('Mock error');
     }
@@ -76,7 +77,7 @@ describe('useChartData', () => {
   
   it('应该支持重新获取数据', async () => {
     const dataSource = new MockDataSource();
-    const params = {
+    const params: ChartQueryParams = {
       startTime: Math.floor(Date.now() / 1000) - 3600,
       endTime: Math.floor(Date.now() / 1000),
       step: 60
@@ -90,8 +91,10 @@ describe('useChartData', () => {
     
     expect(result.current.data).toBeTruthy();
     
-    // 重新获取数据
-    result.current.refetch();
+    // 使用 act 包裹状态更新
+    await act(async () => {
+      result.current.refetch();
+    });
     
     expect(result.current.loading).toBe(true);
     
