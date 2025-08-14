@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { MetricChartPlugin } from 'react-metric-chart-plugin';
-interface MetricStats {
-  name: string;
-  current: number;
-  maximum: number;
-  minimum: number;
-  average: number;
-  color: string;
-}
+import { MetricChartPlugin, MetricStats } from 'react-metric-chart-plugin';
 import 'antd/dist/reset.css';
 
 const App: React.FC = () => {
@@ -131,7 +123,7 @@ const App: React.FC = () => {
   return (
     <div style={{ padding: 24 }}>
       <MetricChartPlugin
-        options={chartOptions}
+        chartOptions={chartOptions}
         statsData={statsData}
         title="系统资源监控"
         height={400}
