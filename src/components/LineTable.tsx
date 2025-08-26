@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { Table, Input, Button, Space } from 'antd';
 import type { TableProps } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { LineTableProps, DataType } from '../types';
+import { getIconComponent, getTableProps } from '../utils/antdCompat';
 
 type ColumnType<T> = NonNullable<TableProps<T>['columns']>[0];
 
@@ -19,7 +19,6 @@ const TableContainer = styled.div`
     padding: 8px 12px !important;
 
     .cell-content {
-      max-width: 200px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -47,8 +46,8 @@ export const LineTable: React.FC<LineTableProps> = ({
   checkedItems = [],
   onItemCheck,
   height = 400,
-  usePagination = true, // 默认使用分页
-  maxHeight = 600, // 默认最大高度
+  usePagination = true,
+  maxHeight = 600,
 }) => {
   const [searchText, setSearchText] = useState<string>('');
   const [searchColumn, setSearchColumn] = useState<string>('');
@@ -62,11 +61,11 @@ export const LineTable: React.FC<LineTableProps> = ({
     });
 
     return Array.from(allKeys)
-      .filter((key: string) => key !== 'key' && key !== 'time') // 过滤掉time列
+      .filter((key: string) => key !== 'key' && key !== 'time')
       .map((key: string): ColumnType<DataType> => {
         const isNameColumn = key === 'name';
         const isNumericColumn = ['current', 'average', 'maximum', 'minimum'].includes(key);
-        const isSearchableColumn = isNameColumn; // 只有name列支持搜索
+        const isSearchableColumn = isNameColumn;
         
         return {
           title: key === 'name' ? '系列名称' :
@@ -76,8 +75,7 @@ export const LineTable: React.FC<LineTableProps> = ({
                  key === 'minimum' ? '最小值' : key,
           dataIndex: key,
           key,
-          width: isNameColumn ? 200 : 120,
-          // 只有非系列名称列支持排序
+          width: isNameColumn ? 300 : 120, // 系列名称列从200px增加到300px
           sorter: !isNameColumn ? (
             isNumericColumn ? {
               compare: (a: DataType, b: DataType) => {
@@ -141,7 +139,6 @@ export const LineTable: React.FC<LineTableProps> = ({
               </div>
             );
           },
-          // 只有系列名称列支持搜索
           filterDropdown: isSearchableColumn ? ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: FilterDropdownProps): React.ReactNode => (
             <div style={{ padding: 8 }}>
               <Input
@@ -163,7 +160,7 @@ export const LineTable: React.FC<LineTableProps> = ({
                     setSearchText(selectedKeys[0] as string);
                     setSearchColumn(key);
                   }}
-                  icon={<SearchOutlined />}
+                  icon={React.createElement(getIconComponent('SearchOutlined') || 'span')}
                   size="small"
                   style={{ width: 90 }}
                 >
@@ -183,9 +180,12 @@ export const LineTable: React.FC<LineTableProps> = ({
               </Space>
             </div>
           ) : undefined,
-          filterIcon: isSearchableColumn ? (filtered: boolean): React.ReactNode => (
-            <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
-          ) : undefined,
+          filterIcon: isSearchableColumn ? (filtered: boolean): React.ReactNode => {
+            const SearchIcon = getIconComponent('SearchOutlined');
+            return SearchIcon ? React.createElement(SearchIcon, { 
+              style: { color: filtered ? '#1890ff' : undefined } 
+            }) : null;
+          } : undefined,
         };
       });
   }, [data, colorMap, searchText, searchColumn]);
@@ -201,25 +201,19 @@ export const LineTable: React.FC<LineTableProps> = ({
   // 计算表格滚动配置
   const scrollConfig = useMemo(() => {
     if (usePagination) {
-      // 使用分页时的滚动配置
       return { y: height - 100, x: 'max-content' };
     } else {
-      // 不使用分页时，设置最大高度并允许滚动
       return { y: maxHeight - 150, x: 'max-content' };
     }
   }, [usePagination, height, maxHeight]);
 
+  // 获取兼容的Table属性
+  const compatibleTableProps = getTableProps();
+
   return (
-    <div>
-      <div style={{ marginBottom: 16 }}>
+    <>
+      <>
         <Space>
-          <Input
-            placeholder="全局搜索..."
-            value={searchText}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
-            style={{ width: 200 }}
-            prefix={<SearchOutlined />}
-          />
           {searchText && (
             <Button
               onClick={() => {
@@ -231,10 +225,10 @@ export const LineTable: React.FC<LineTableProps> = ({
             </Button>
           )}
         </Space>
-      </div>
-
+      </>
       <TableContainer>
         <Table<DataType>
+          {...compatibleTableProps}
           columns={columns}
           dataSource={filteredData}
           pagination={usePagination ? {
@@ -242,7 +236,7 @@ export const LineTable: React.FC<LineTableProps> = ({
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total: number) => `共 ${total} 条记录`,
-          } : false} // 根据usePagination控制分页
+          } : false}
           scroll={scrollConfig}
           size="small"
           bordered
@@ -257,9 +251,10 @@ export const LineTable: React.FC<LineTableProps> = ({
             getCheckboxProps: (record: DataType) => ({
               name: record.name,
             }),
+            columnWidth: 50, // 新增：设置勾选框列宽度为50px
           }}
         />
       </TableContainer>
-    </div>
+    </>
   );
 };

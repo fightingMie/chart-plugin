@@ -8,10 +8,10 @@ const App: React.FC = () => {
 
   // ECharts配置选项
   const chartOptions = {
-    title: {
-      text: '系统资源监控',
-      left: 'center'
-    },
+    // title: {
+    //   text: '系统资源监控',
+    //   left: 'center'
+    // },
     tooltip: {
       trigger: 'axis',
       axisPointer: {
@@ -19,8 +19,16 @@ const App: React.FC = () => {
       }
     },
     legend: {
+      show:false,
       bottom: 10,
       data: ['CPU使用率', '内存使用率', '磁盘使用率']
+    },
+    grid: {
+      top: 20,
+      bottom: 20,
+      left: 20,
+      right: 20,
+      containLabel: true
     },
     xAxis: {
       type: 'time',
@@ -78,7 +86,20 @@ const App: React.FC = () => {
           color: '#faad14'
         }
       }
-    ]
+    ],
+    toolbox: {
+      show: true,
+      right: 0,
+      top: -10,
+      feature: {
+        dataZoom: {
+          yAxisIndex: 'none',
+          icon: {
+            zoom: 'path://',
+          },
+        },
+      },
+    },
   };
 
   // 统计数据
@@ -125,9 +146,9 @@ const App: React.FC = () => {
       <MetricChartPlugin
         chartOptions={chartOptions}
         statsData={statsData}
-        title="系统资源监控"
+        title="指标名称"
         height={400}
-        showControls={true}
+        showControls={false}
         showTable={true}
         usePagination={false}
         maxHeight={300}

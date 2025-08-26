@@ -1,7 +1,7 @@
-import { jsx, jsxs } from 'react/jsx-runtime';
-import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
+import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
+import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { Input, Space, Button, Table, Select, Card, Row, Col } from 'antd';
-import { SearchOutlined, ReloadOutlined, DownloadOutlined } from '@ant-design/icons';
+import { ReloadOutlined, DownloadOutlined } from '@ant-design/icons';
 import * as echarts from 'echarts';
 import styled from 'styled-components';
 
@@ -158,11 +158,55 @@ var Chart = function (_a) {
     return (jsx("div", { ref: chartRef, style: { width: '100%', height: "".concat(height, "px") } }));
 };
 
-var TableContainer = styled.div(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  .ant-table-cell {\n    padding: 8px 12px !important;\n\n    .cell-content {\n      max-width: 200px;\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n  }\n\n  .highlight {\n    background-color: #fff2e8;\n    padding: 0 2px;\n  }\n\n  .color-indicator {\n    display: inline-block;\n    width: 12px;\n    height: 12px;\n    border-radius: 2px;\n    margin-right: 8px;\n    vertical-align: middle;\n  }\n"], ["\n  .ant-table-cell {\n    padding: 8px 12px !important;\n\n    .cell-content {\n      max-width: 200px;\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n  }\n\n  .highlight {\n    background-color: #fff2e8;\n    padding: 0 2px;\n  }\n\n  .color-indicator {\n    display: inline-block;\n    width: 12px;\n    height: 12px;\n    border-radius: 2px;\n    margin-right: 8px;\n    vertical-align: middle;\n  }\n"])));
+// 版本检测
+var getAntdVersion = function () {
+    try {
+        var antd = require('antd/package.json');
+        return antd.version.startsWith('4') ? '4' : '5';
+    }
+    catch (_a) {
+        return '5'; // 默认假设为 5.x
+    }
+};
+var isAntd4 = function () { return getAntdVersion() === '4'; };
+// Table 兼容性
+var getTableProps = function () {
+    if (isAntd4()) {
+        return {
+            // Ant Design 4.x 特有的属性
+            size: 'middle',
+        };
+    }
+    else {
+        return {
+            // Ant Design 5.x 特有的属性
+            size: 'middle',
+            virtual: true,
+        };
+    }
+};
+// 图标兼容性
+var getIconComponent = function (iconName) {
+    try {
+        if (isAntd4()) {
+            // Ant Design 4.x 图标导入方式
+            var icons = require('@ant-design/icons');
+            return icons[iconName];
+        }
+        else {
+            // Ant Design 5.x 图标导入方式（相同）
+            var icons = require('@ant-design/icons');
+            return icons[iconName];
+        }
+    }
+    catch (_a) {
+        return null;
+    }
+};
+
+var TableContainer = styled.div(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  .ant-table-cell {\n    padding: 8px 12px !important;\n\n    .cell-content {\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n  }\n\n  .highlight {\n    background-color: #fff2e8;\n    padding: 0 2px;\n  }\n\n  .color-indicator {\n    display: inline-block;\n    width: 12px;\n    height: 12px;\n    border-radius: 2px;\n    margin-right: 8px;\n    vertical-align: middle;\n  }\n"], ["\n  .ant-table-cell {\n    padding: 8px 12px !important;\n\n    .cell-content {\n      overflow: hidden;\n      text-overflow: ellipsis;\n      white-space: nowrap;\n    }\n  }\n\n  .highlight {\n    background-color: #fff2e8;\n    padding: 0 2px;\n  }\n\n  .color-indicator {\n    display: inline-block;\n    width: 12px;\n    height: 12px;\n    border-radius: 2px;\n    margin-right: 8px;\n    vertical-align: middle;\n  }\n"])));
 var LineTable = function (_a) {
-    var data = _a.data, _b = _a.colorMap, colorMap = _b === void 0 ? {} : _b, _c = _a.checkedItems, checkedItems = _c === void 0 ? [] : _c, onItemCheck = _a.onItemCheck, _d = _a.height, height = _d === void 0 ? 400 : _d, _e = _a.usePagination, usePagination = _e === void 0 ? true : _e, // 默认使用分页
-    _f = _a.maxHeight, // 默认使用分页
-    maxHeight = _f === void 0 ? 600 : _f;
+    var data = _a.data, _b = _a.colorMap, colorMap = _b === void 0 ? {} : _b, _c = _a.checkedItems, checkedItems = _c === void 0 ? [] : _c, onItemCheck = _a.onItemCheck, _d = _a.height, height = _d === void 0 ? 400 : _d, _e = _a.usePagination, usePagination = _e === void 0 ? true : _e, _f = _a.maxHeight, maxHeight = _f === void 0 ? 600 : _f;
     var _g = useState(''), searchText = _g[0], setSearchText = _g[1];
     var _h = useState(''), searchColumn = _h[0], setSearchColumn = _h[1];
     var columns = useMemo(function () {
@@ -173,11 +217,11 @@ var LineTable = function (_a) {
             Object.keys(item).forEach(function (key) { return allKeys.add(key); });
         });
         return Array.from(allKeys)
-            .filter(function (key) { return key !== 'key' && key !== 'time'; }) // 过滤掉time列
+            .filter(function (key) { return key !== 'key' && key !== 'time'; })
             .map(function (key) {
             var isNameColumn = key === 'name';
             var isNumericColumn = ['current', 'average', 'maximum', 'minimum'].includes(key);
-            var isSearchableColumn = isNameColumn; // 只有name列支持搜索
+            var isSearchableColumn = isNameColumn;
             return {
                 title: key === 'name' ? '系列名称' :
                     key === 'current' ? '当前值' :
@@ -186,8 +230,7 @@ var LineTable = function (_a) {
                                 key === 'minimum' ? '最小值' : key,
                 dataIndex: key,
                 key: key,
-                width: isNameColumn ? 200 : 120,
-                // 只有非系列名称列支持排序
+                width: isNameColumn ? 300 : 120,
                 sorter: !isNameColumn ? (isNumericColumn ? {
                     compare: function (a, b) {
                         var aVal = parseFloat(a[key]) || 0;
@@ -218,7 +261,6 @@ var LineTable = function (_a) {
                                 __html: displayText.replace(new RegExp(searchText, 'gi'), function (match) { return "<span class=\"highlight\">".concat(match, "</span>"); }),
                             } })) : (displayText) })));
                 },
-                // 只有系列名称列支持搜索
                 filterDropdown: isSearchableColumn ? function (_a) {
                     var setSelectedKeys = _a.setSelectedKeys, selectedKeys = _a.selectedKeys, confirm = _a.confirm, clearFilters = _a.clearFilters;
                     return (jsxs("div", __assign({ style: { padding: 8 } }, { children: [jsx(Input, { placeholder: "\u641C\u7D22 ".concat(key === 'name' ? '系列名称' : key), value: selectedKeys[0], onChange: function (e) { return setSelectedKeys(e.target.value ? [e.target.value] : []); }, onPressEnter: function () {
@@ -229,13 +271,18 @@ var LineTable = function (_a) {
                                             confirm();
                                             setSearchText(selectedKeys[0]);
                                             setSearchColumn(key);
-                                        }, icon: jsx(SearchOutlined, {}), size: "small", style: { width: 90 } }, { children: "\u641C\u7D22" })), jsx(Button, __assign({ onClick: function () {
+                                        }, icon: React.createElement(getIconComponent('SearchOutlined') || 'span'), size: "small", style: { width: 90 } }, { children: "\u641C\u7D22" })), jsx(Button, __assign({ onClick: function () {
                                             clearFilters && clearFilters();
                                             setSearchText('');
                                             setSearchColumn('');
                                         }, size: "small", style: { width: 90 } }, { children: "\u91CD\u7F6E" }))] })] })));
                 } : undefined,
-                filterIcon: isSearchableColumn ? function (filtered) { return (jsx(SearchOutlined, { style: { color: filtered ? '#1890ff' : undefined } })); } : undefined,
+                filterIcon: isSearchableColumn ? function (filtered) {
+                    var SearchIcon = getIconComponent('SearchOutlined');
+                    return SearchIcon ? React.createElement(SearchIcon, {
+                        style: { color: filtered ? '#1890ff' : undefined }
+                    }) : null;
+                } : undefined,
             };
         });
     }, [data, colorMap, searchText, searchColumn]);
@@ -250,18 +297,18 @@ var LineTable = function (_a) {
     // 计算表格滚动配置
     var scrollConfig = useMemo(function () {
         if (usePagination) {
-            // 使用分页时的滚动配置
             return { y: height - 100, x: 'max-content' };
         }
         else {
-            // 不使用分页时，设置最大高度并允许滚动
             return { y: maxHeight - 150, x: 'max-content' };
         }
     }, [usePagination, height, maxHeight]);
-    return (jsxs("div", { children: [jsx("div", __assign({ style: { marginBottom: 16 } }, { children: jsxs(Space, { children: [jsx(Input, { placeholder: "\u5168\u5C40\u641C\u7D22...", value: searchText, onChange: function (e) { return setSearchText(e.target.value); }, style: { width: 200 }, prefix: jsx(SearchOutlined, {}) }), searchText && (jsx(Button, __assign({ onClick: function () {
-                                setSearchText('');
-                                setSearchColumn('');
-                            } }, { children: "\u6E05\u9664\u641C\u7D22" })))] }) })), jsx(TableContainer, { children: jsx(Table, { columns: columns, dataSource: filteredData, pagination: usePagination ? {
+    // 获取兼容的Table属性
+    var compatibleTableProps = getTableProps();
+    return (jsxs(Fragment, { children: [jsx(Fragment, { children: jsx(Space, { children: searchText && (jsx(Button, __assign({ onClick: function () {
+                            setSearchText('');
+                            setSearchColumn('');
+                        } }, { children: "\u6E05\u9664\u641C\u7D22" }))) }) }), jsx(TableContainer, { children: jsx(Table, __assign({}, compatibleTableProps, { columns: columns, dataSource: filteredData, pagination: usePagination ? {
                         pageSize: 50,
                         showSizeChanger: true,
                         showQuickJumper: true,
@@ -274,7 +321,8 @@ var LineTable = function (_a) {
                         getCheckboxProps: function (record) { return ({
                             name: record.name,
                         }); },
-                    } }) })] }));
+                        columnWidth: 50, // 新增：设置勾选框列宽度为50px
+                    } })) })] }));
 };
 var templateObject_1;
 
@@ -349,7 +397,7 @@ var MetricChartPlugin = function (_a) {
             }
         });
     }); };
-    return (jsxs(Card, __assign({ title: title, style: { width: '100%' } }, { children: [showControls && (jsx("div", __assign({ style: { marginBottom: 16 } }, { children: jsxs(Row, __assign({ gutter: [16, 16], align: "middle" }, { children: [jsx(Col, { children: jsxs(Space, { children: [jsx("span", { children: "\u89C6\u56FE:" }), jsxs(Select, __assign({ value: viewMode, onChange: setViewMode, style: { width: 120 } }, { children: [jsx(Option, __assign({ value: "chart" }, { children: "\u4EC5\u56FE\u8868" })), showTable && jsx(Option, __assign({ value: "table" }, { children: "\u4EC5\u8868\u683C" })), showTable && jsx(Option, __assign({ value: "both" }, { children: "\u56FE\u8868+\u8868\u683C" }))] }))] }) }), jsx(Col, { children: jsxs(Space, { children: [onRefresh && (jsx(Button, __assign({ icon: jsx(ReloadOutlined, {}), onClick: handleRefresh, loading: loading }, { children: "\u5237\u65B0" }))), showTable && (jsx(Button, __assign({ icon: jsx(DownloadOutlined, {}), onClick: handleExport, disabled: !tableData.length }, { children: "\u5BFC\u51FA" })))] }) })] })) }))), (viewMode === 'chart' || viewMode === 'both') && (jsx("div", __assign({ style: { marginBottom: viewMode === 'both' ? 24 : 0 } }, { children: jsx(Chart, { options: chartOptions, height: height, loading: loading, visibleSeries: checkedItems }) }))), showTable && (viewMode === 'table' || viewMode === 'both') && (jsx(LineTable, { data: tableData, colorMap: colorMap, height: viewMode === 'table' ? height : 300, onItemCheck: handleItemCheck, checkedItems: checkedItems, usePagination: usePagination, maxHeight: maxHeight }))] })));
+    return (jsxs(Card, __assign({ size: 'small', title: title, style: { width: '100%' } }, { children: [showControls && (jsx("div", __assign({ style: { marginBottom: 16 } }, { children: jsxs(Row, __assign({ gutter: [16, 16], align: "middle" }, { children: [jsx(Col, { children: jsxs(Space, { children: [jsx("span", { children: "\u89C6\u56FE:" }), jsxs(Select, __assign({ value: viewMode, onChange: setViewMode, style: { width: 120 } }, { children: [jsx(Option, __assign({ value: "chart" }, { children: "\u4EC5\u56FE\u8868" })), showTable && jsx(Option, __assign({ value: "table" }, { children: "\u4EC5\u8868\u683C" })), showTable && jsx(Option, __assign({ value: "both" }, { children: "\u56FE\u8868+\u8868\u683C" }))] }))] }) }), jsx(Col, { children: jsxs(Space, { children: [onRefresh && (jsx(Button, __assign({ icon: jsx(ReloadOutlined, {}), onClick: handleRefresh, loading: loading }, { children: "\u5237\u65B0" }))), showTable && (jsx(Button, __assign({ icon: jsx(DownloadOutlined, {}), onClick: handleExport, disabled: !tableData.length }, { children: "\u5BFC\u51FA" })))] }) })] })) }))), (viewMode === 'chart' || viewMode === 'both') && (jsx("div", __assign({ style: { marginBottom: viewMode === 'both' ? 8 : 0 } }, { children: jsx(Chart, { options: chartOptions, height: height, loading: loading, visibleSeries: checkedItems }) }))), showTable && (viewMode === 'table' || viewMode === 'both') && (jsx(LineTable, { data: tableData, colorMap: colorMap, height: viewMode === 'table' ? height : 300, onItemCheck: handleItemCheck, checkedItems: checkedItems, usePagination: usePagination, maxHeight: maxHeight }))] })));
 };
 
 function useChartData(dataSource, params, options) {

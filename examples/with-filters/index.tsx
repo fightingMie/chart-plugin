@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { MetricChartPlugin, BaseDataSource } from 'react-metric-chart-plugin';
-import { ChartQueryParams, ChartData } from 'react-metric-chart-plugin';
+import { ChartQueryParams, ChartData, MetricStats } from 'react-metric-chart-plugin';
 import { Select, Card, Space } from 'antd';
 import 'antd/dist/reset.css';
 
@@ -9,9 +9,15 @@ const { Option } = Select;
 
 // 支持过滤器的数据源
 class FilterableDataSource extends BaseDataSource {
+  private filters: Record<string, any> = {};
+  
+  updateFilters(filters: Record<string, any>) {
+    this.filters = filters;
+  }
+  
   async fetchData(params: ChartQueryParams): Promise<ChartData> {
-    const { startTime, endTime, step = 60, filters = {} } = params;
-    const { instance, metric_type } = filters;
+    const { startTime, endTime, step = 60 } = params;
+    const { instance, metric_type } = { ...params.filters, ...this.filters };
     
     await new Promise(resolve => setTimeout(resolve, 800));
     
@@ -63,18 +69,100 @@ class FilterableDataSource extends BaseDataSource {
 const App: React.FC = () => {
   const [dataSource] = useState(() => new FilterableDataSource());
   const [filters, setFilters] = useState<Record<string, any>>({});
-  const [key, setKey] = useState(0); // 用于强制重新渲染
+  const [chartOptions, setChartOptions] = useState<any>(null);
+  const [statsData, setStatsData] = useState<MetricStats[]>([]);
+  const [loading, setLoading] = useState(false);
+  
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const params: ChartQueryParams = {
+        startTime: Math.floor((Date.now() - 3600000) / 1000), // 1小时前
+        endTime: Math.floor(Date.now() / 1000), // 现在
+        step: 60, // 1分钟间隔
+        filters
+      };
+      
+      const data = await dataSource.fetchData(params);
+      
+      // 转换为ECharts格式
+      const echartsOptions = {
+        title: {
+          text: '多实例监控指标'
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross'
+          }
+        },
+        legend: {
+          data: data.series.map(s => s.name),
+          type: 'scroll',
+          orient: 'horizontal'
+        },
+        xAxis: {
+          type: 'time',
+          boundaryGap: false
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: {
+            formatter: '{value}%'
+          }
+        },
+        series: data.series.map(s => ({
+          name: s.name,
+          type: 'line',
+          data: s.data,
+          smooth: true,
+          lineStyle: {
+            color: s.color
+          },
+          itemStyle: {
+            color: s.color
+          }
+        }))
+      };
+      
+      setChartOptions(echartsOptions);
+      
+      // 计算统计数据
+      const stats: MetricStats[] = data.series.map(series => {
+        const values = series.data.map(([, value]) => value);
+        return {
+          name: series.name,
+          current: values[values.length - 1],
+          maximum: Math.max(...values),
+          minimum: Math.min(...values),
+          average: values.reduce((a, b) => a + b, 0) / values.length,
+          color: series.color
+        };
+      });
+      
+      setStatsData(stats);
+    } catch (error) {
+      console.error('获取数据失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   const handleFilterChange = (filterKey: string, value: any) => {
     const newFilters = { ...filters, [filterKey]: value };
     setFilters(newFilters);
     
     // 更新数据源的过滤器
-    dataSource.updateFilters?.(newFilters);
-    
-    // 强制重新渲染组件
-    setKey(prev => prev + 1);
+    dataSource.updateFilters(newFilters);
   };
+  
+  useEffect(() => {
+    fetchData();
+  }, [filters]);
+  
+  if (!chartOptions) {
+    return <div>加载中...</div>;
+  }
   
   return (
     <div style={{ padding: '20px' }}>
@@ -113,13 +201,13 @@ const App: React.FC = () => {
       </Card>
       
       <MetricChartPlugin
-        key={key}
-        dataSource={dataSource}
+        chartOptions={chartOptions}
+        statsData={statsData}
         title="多实例监控指标"
         height={400}
-        defaultTimeRange={[Date.now() - 3600000, Date.now()]}
-        defaultStep={60}
         showControls={true}
+        showTable={true}
+        onRefresh={fetchData}
       />
     </div>
   );

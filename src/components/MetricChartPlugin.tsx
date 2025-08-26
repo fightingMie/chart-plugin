@@ -1,13 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import {
-  Card,
-  Select,
-  Space,
-  Button,
-  Row,
-  Col,
-  // Alert, // 移除未使用的导入
-} from 'antd';
+import { Card, Select, Space, Button, Row, Col } from 'antd';
 import { ReloadOutlined, DownloadOutlined } from '@ant-design/icons';
 import { Chart } from './Chart';
 import { LineTable } from './LineTable';
@@ -90,7 +82,7 @@ export const MetricChartPlugin: React.FC<MetricChartPluginProps> = ({
   };
 
   return (
-    <Card title={title} style={{ width: '100%' }}>
+    <Card size='small' title={title} style={{ width: '100%' }}>
       {showControls && (
         <div style={{ marginBottom: 16 }}>
           <Row gutter={[16, 16]} align="middle">
@@ -135,7 +127,7 @@ export const MetricChartPlugin: React.FC<MetricChartPluginProps> = ({
       )}
 
       {(viewMode === 'chart' || viewMode === 'both') && (
-        <div style={{ marginBottom: viewMode === 'both' ? 24 : 0 }}>
+        <div style={{ marginBottom: viewMode === 'both' ? 8 : 0 }}>
           <Chart
             options={chartOptions}
             height={height}
