@@ -5,7 +5,8 @@ import { Chart } from './Chart';
 import { LineTable } from './LineTable';
 import { MetricChartPluginProps, DataType, MetricStats } from '../types';
 
-const { Option } = Select;
+// 安全地获取Option，避免测试环境中的undefined错误
+const { Option } = Select || { Option: null };
 
 export const MetricChartPlugin: React.FC<MetricChartPluginProps> = ({
   chartOptions,
