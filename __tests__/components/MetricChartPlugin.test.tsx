@@ -2,6 +2,17 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { MetricStats } from '../../src/types';
 
+// 添加 jest-dom 类型声明
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toBeInTheDocument(): R;
+      toHaveTextContent(text: string): R;
+      toHaveAttribute(attr: string, value?: string): R;
+    }
+  }
+}
+
 // 首先定义所有的 Mock 组件
 const MockOption = ({ children, value }: any) => (
   <option value={value}>{children}</option>
