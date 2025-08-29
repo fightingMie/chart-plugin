@@ -1,6 +1,6 @@
 {
   "name": "react-metric-chart-plugin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A reusable React plugin for metric chart visualization",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -47,7 +47,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fightingMie/chart-plugin.git"
+    "url": "git+https://github.com/fightingMie/chart-plugin.git"
   },
   "bugs": {
     "url": "https://github.com/fightingMie/chart-plugin/issues"

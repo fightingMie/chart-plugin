@@ -347,7 +347,8 @@ var LineTable = function (_a) {
 };
 var templateObject_1;
 
-var Option = antd.Select.Option;
+// 安全地获取Option，避免测试环境中的undefined错误
+var Option = (antd.Select || { Option: null }).Option;
 var MetricChartPlugin = function (_a) {
     var chartOptions = _a.chartOptions, _b = _a.statsData, statsData = _b === void 0 ? [] : _b, _c = _a.title, title = _c === void 0 ? '指标图表' : _c, _d = _a.height, height = _d === void 0 ? 400 : _d, _e = _a.showControls, showControls = _e === void 0 ? true : _e, _f = _a.showTable, showTable = _f === void 0 ? true : _f, _g = _a.usePagination, usePagination = _g === void 0 ? true : _g, _h = _a.maxHeight, maxHeight = _h === void 0 ? 600 : _h, onExport = _a.onExport, onRefresh = _a.onRefresh;
     var _j = React.useState('both'), viewMode = _j[0], setViewMode = _j[1];
