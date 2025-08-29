@@ -47,12 +47,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yang1119/react-metric-chart-plugin.git"
+    "url": "https://github.com/fightingMie/chart-plugin.git"
   },
   "bugs": {
-    "url": "https://github.com/yang1119/react-metric-chart-plugin/issues"
+    "url": "https://github.com/fightingMie/chart-plugin/issues"
   },
-  "homepage": "https://github.com/yang1119/react-metric-chart-plugin#readme",
+  "homepage": "https://github.com/fightingMie/chart-plugin/blob/main/README.md",
   "peerDependencies": {
     "@ant-design/icons": ">=4.0.0",
     "antd": ">=4.0.0",
